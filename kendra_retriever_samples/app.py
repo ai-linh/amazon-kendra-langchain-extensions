@@ -11,8 +11,8 @@ import kendra_chat_llama_2 as llama2
 import kendra_chat_bedrock_titan as bedrock_titan
 import kendra_chat_bedrock_claude as bedrock_claude
 import kendra_chat_bedrock_claudev2 as bedrock_claudev2
-
-
+import kendra_chat_jurassic_mid as j2_mid
+import kendra_chat_jurassic_ultra as j2_ultra
 
 USER_ICON = "images/user-icon.png"
 AI_ICON = "images/ai-icon.png"
@@ -23,7 +23,9 @@ PROVIDER_MAP = {
     'flanxl': 'Flan XL',
     'flanxxl': 'Flan XXL',
     'falcon40b': 'Falcon 40B',
-    'llama2' : 'Llama 2'
+    'llama2' : 'Llama 2',
+    'j2_mid': 'Jurassic Mid',
+    'j2_ultra': 'Jurassic Ultra'
 }
 
 #function to read a properties file and create environment variables
@@ -76,10 +78,16 @@ if 'llm_chain' not in st.session_state:
         elif (sys.argv[1] == 'bedrock_claudev2'):
             st.session_state['llm_app'] = bedrock_claudev2
             st.session_state['llm_chain'] = bedrock_claudev2.build_chain()
+        elif (sys.argv[1] == 'j2_mid'):
+            st.session_state['llm_app'] = j2_mid
+            st.session_state['llm_chain'] = j2_mid.build_chain()
+        elif (sys.argv[1] == 'j2_ultra'):
+            st.session_state['llm_app'] = j2_ultra
+            st.session_state['llm_chain'] = j2_ultra.build_chain()
         else:
             raise Exception("Unsupported LLM: ", sys.argv[1])
     else:
-        raise Exception("Usage: streamlit run app.py <anthropic|flanxl|flanxxl|openai|bedrock_titan|bedrock_claude|bedrock|claudev2>")
+        raise Exception("Usage: streamlit run app.py <anthropic|flanxl|flanxxl|openai|bedrock_titan|bedrock_claude|bedrock|claudev2||j2_mid|j2_ultra>")
 
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []

@@ -10,30 +10,31 @@ import os
 def build_chain():
     region = os.environ["AWS_REGION"]
     kendra_index_id = os.environ["KENDRA_INDEX_ID"]
-    endpoint_name = os.environ["FLAN_XXL_ENDPOINT"]
+    endpoint_name = os.environ["J2_ULTRA_ENDPOINT"]
 
     class ContentHandler(LLMContentHandler):
         content_type = "application/json"
         accepts = "application/json"
 
         def transform_input(self, prompt: str, model_kwargs: dict) -> bytes:
-            input_str = json.dumps({"text_inputs": prompt, **model_kwargs})
+            input_str = json.dumps({"prompt": prompt, **model_kwargs})
             return input_str.encode('utf-8')
-        
+
         def transform_output(self, output: bytes) -> str:
             response_json = json.loads(output.read().decode("utf-8"))
-            print(response_json)
-            return response_json["generated_texts"][0]
+            #return response_json[0]["generated_text"]
+            return response_json['completions'][0]['data']['text']
 
     content_handler = ContentHandler()
 
     llm=SagemakerEndpoint(
-            endpoint_name=endpoint_name, 
-            region_name=region, 
-            model_kwargs={"temperature":1e-10, "max_length": 500},
-            content_handler=content_handler
-        )
-    retriever = AmazonKendraRetriever(index_id=kendra_index_id,region_name=region)
+        endpoint_name=endpoint_name,
+        region_name=region,
+        model_kwargs={"temperature":1e-10, "maxTokens": 500},
+        content_handler=content_handler
+    )
+
+    retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
     prompt_template = """
     The following is a friendly conversation between a human and an AI. 
@@ -49,9 +50,9 @@ def build_chain():
     )
     chain_type_kwargs = {"prompt": PROMPT}
     qa = RetrievalQA.from_chain_type(
-        llm, 
-        chain_type="stuff", 
-        retriever=retriever, 
+        llm,
+        chain_type="stuff",
+        retriever=retriever,
         chain_type_kwargs=chain_type_kwargs,
         return_source_documents=True
     )
@@ -72,4 +73,4 @@ if __name__ == "__main__":
     if 'source_documents' in result:
         print('Sources:')
         for d in result['source_documents']:
-          print(d.metadata['source'])
+            print(d.metadata['source'])
