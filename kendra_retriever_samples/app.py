@@ -6,7 +6,8 @@ import kendra_chat_anthropic as anthropic
 import kendra_chat_flan_xl as flanxl
 import kendra_chat_flan_xxl as flanxxl
 import kendra_chat_open_ai as openai
-
+import kendra_chat_jurassic_mid as j2_mid
+import kendra_chat_jurassic_ultra as j2_ultra
 
 USER_ICON = "images/user-icon.png"
 AI_ICON = "images/ai-icon.png"
@@ -15,7 +16,9 @@ PROVIDER_MAP = {
     'openai': 'Open AI',
     'anthropic': 'Anthropic',
     'flanxl': 'Flan XL',
-    'flanxxl': 'Flan XXL'
+    'flanxxl': 'Flan XXL',
+    'j2_mid': 'Jurassic Mid',
+    'j2_ultra': 'Jurassic Ultra'
 }
 
 # Check if the user ID is already stored in the session state
@@ -42,10 +45,16 @@ if 'llm_chain' not in st.session_state:
         elif (sys.argv[1] == 'openai'):
             st.session_state['llm_app'] = openai
             st.session_state['llm_chain'] = openai.build_chain()
+        elif (sys.argv[1] == 'j2_mid'):
+            st.session_state['llm_app'] = j2_mid
+            st.session_state['llm_chain'] = j2_mid.build_chain()
+        elif (sys.argv[1] == 'j2_ultra'):
+            st.session_state['llm_app'] = j2_ultra
+            st.session_state['llm_chain'] = j2_ultra.build_chain()
         else:
             raise Exception("Unsupported LLM: ", sys.argv[1])
     else:
-        raise Exception("Usage: streamlit run app.py <anthropic|flanxl|flanxxl|openai>")
+        raise Exception("Usage: streamlit run app.py <anthropic|flanxl|flanxxl|openai|j2_mid|j2_ultra>")
 
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
