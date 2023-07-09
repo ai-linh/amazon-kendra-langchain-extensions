@@ -23,27 +23,32 @@ MAX_HISTORY_LENGTH = 5
 def build_chain():
   region = os.environ["AWS_REGION"]
   kendra_index_id = os.environ["KENDRA_INDEX_ID"]
-  endpoint_name = os.environ["J2_ULTRA_ENDPOINT"]
+  endpoint_name = os.environ["FALCON40B_ENDPOINT"]
 
   class ContentHandler(LLMContentHandler):
       content_type = "application/json"
       accepts = "application/json"
 
       def transform_input(self, prompt: str, model_kwargs: dict) -> bytes:
-          input_str = json.dumps({"prompt": prompt, **model_kwargs})
+          input_str = json.dumps({"inputs": prompt, **model_kwargs})
           return input_str.encode('utf-8')
       
       def transform_output(self, output: bytes) -> str:
           response_json = json.loads(output.read().decode("utf-8"))
           #return response_json["generated_texts"][0]
-          return response_json['completions'][0]['data']['text']
+          return response_json[0]['generated_text']
 
   content_handler = ContentHandler()
 
   llm=SagemakerEndpoint(
           endpoint_name=endpoint_name, 
           region_name=region, 
-          model_kwargs={"temperature":1e-10, "maxTokens": 500},
+          model_kwargs={
+              # "do_sample": True,
+              # "top_p": 0.9,
+              "temperature": 1e-10,
+              "max_new_tokens": 500
+          },
           content_handler=content_handler
       )
       
