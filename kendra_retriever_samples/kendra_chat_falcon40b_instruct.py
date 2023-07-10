@@ -35,7 +35,7 @@ def build_chain():
       
       def transform_output(self, output: bytes) -> str:
           response_json = json.loads(output.read().decode("utf-8"))
-          #return response_json["generated_texts"][0]
+          #print(f"response_json: {response_json[0]['generated_text']}")
           return response_json[0]['generated_text']
 
   content_handler = ContentHandler()
@@ -43,12 +43,7 @@ def build_chain():
   llm=SagemakerEndpoint(
           endpoint_name=endpoint_name, 
           region_name=region, 
-          model_kwargs={
-              # "do_sample": True,
-              # "top_p": 0.9,
-              "temperature": 1e-10,
-              "max_new_tokens": 500
-          },
+          model_kwargs={"parameters": {"temperature": 1.0, "max_new_tokens": 500, "details": True}},
           content_handler=content_handler
       )
       
