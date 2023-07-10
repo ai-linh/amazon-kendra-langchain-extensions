@@ -29,21 +29,21 @@ def build_chain():
     llm=SagemakerEndpoint(
         endpoint_name=endpoint_name,
         region_name=region,
-        model_kwargs={"parameters": {"temperature": 1e-10, "max_new_tokens": 500}},
+        model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 500, "details": True}},
         content_handler=content_handler
     )
 
     retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
     prompt_template = """
-    The following is a friendly conversation between a human and an AI. 
-    The AI is talkative and provides lots of specific details from its context.
-    If the AI does not know the answer to a question, it truthfully says it 
-    does not know.
-    {context}
-    Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
-    if not present in the document. 
-    Solution:"""
+      The following is a conversation between a Telstra call center agent and a customer. 
+      The Telstra call center agent is helpful and provides lots of specific details from its context.
+      If the Telstra call center agent does not know the answer to a question, it truthfully says it 
+      does not know.
+      {context}
+      Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
+      if not present in the document. 
+      Solution:"""
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
