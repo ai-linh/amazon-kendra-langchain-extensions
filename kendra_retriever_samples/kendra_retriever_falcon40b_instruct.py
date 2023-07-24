@@ -26,7 +26,7 @@ def build_chain():
 
     content_handler = ContentHandler()
 
-    llm=SagemakerEndpoint(
+    llm = SagemakerEndpoint(
         endpoint_name=endpoint_name,
         region_name=region,
         model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 500, "details": True}},
@@ -36,9 +36,9 @@ def build_chain():
     retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
     prompt_template = """
-      The following is a conversation between a Telstra call center agent and a customer. 
-      The Telstra call center agent is helpful and provides lots of specific details from its context.
-      If the Telstra call center agent does not know the answer to a question, it truthfully says it 
+      The following is a conversation between a Telstra AI chatbot and a customer. 
+      The Telstra AI chatbot is helpful and provides lots of specific details from its context.
+      If the Telstra AI chatbot does not know the answer to a question, it truthfully says it 
       does not know.
       {context}
       Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
@@ -47,6 +47,7 @@ def build_chain():
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
+
     chain_type_kwargs = {"prompt": PROMPT}
     qa = RetrievalQA.from_chain_type(
         llm,
@@ -57,13 +58,15 @@ def build_chain():
     )
     return qa
 
+
 def run_chain(chain, prompt: str, history=[]):
-    result = chain(prompt)
+    res = chain(prompt)
     # To make it compatible with chat samples
     return {
-        "answer": result['result'],
-        "source_documents": result['source_documents']
+        "answer": res['result'],
+        "source_documents": res['source_documents']
     }
+
 
 if __name__ == "__main__":
     chain = build_chain()
