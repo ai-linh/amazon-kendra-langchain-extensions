@@ -1,3 +1,6 @@
+import sys
+import time
+
 from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -60,19 +63,29 @@ def build_chain():
 
 
 def run_chain(chain, prompt: str, history=[]):
+    start = time.time()
     res = chain(prompt)
+    end = time.time()
     # To make it compatible with chat samples
     return {
         "answer": res['result'],
-        "source_documents": res['source_documents']
+        "source_documents": res['source_documents'],
+        "metrics": f"{start},{end},{end-start}"
     }
 
 
 if __name__ == "__main__":
+    # read question from command line if there is one
+    if len(sys.argv) > 1:
+        question = sys.argv[1]
+    else:
+        question = "What's SageMaker?"
     chain = build_chain()
-    result = run_chain(chain, "What's SageMaker?")
-    print(result['answer'])
+    print(f"Question: {question}")
+    result = run_chain(chain, question)
+    print(f"Answer: {result['answer']}")
     if 'source_documents' in result:
         print('Sources:')
         for d in result['source_documents']:
             print(d.metadata['source'])
+    print(f"metrics: {result['metrics']}")
