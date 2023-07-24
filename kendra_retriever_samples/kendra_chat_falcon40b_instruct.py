@@ -49,9 +49,9 @@ def build_chain():
   retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
   prompt_template = """
-  The following is a conversation between a Telstra call center agent and a customer. 
-  The Telstra call center agent is helpful and provides lots of specific details from its context.
-  If the Telstra call center agent does not know the answer to a question, it truthfully says it 
+  The following is a conversation between a Telstra AI chatbot and a customer. 
+  The Telstra AI chatbot is helpful and provides lots of specific details from its context.
+  If the Telstra AI chatbot does not know the answer to a question, it truthfully says it 
   does not know.
   {context}
   Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
