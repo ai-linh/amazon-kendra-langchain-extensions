@@ -32,21 +32,27 @@ def build_chain():
     llm = SagemakerEndpoint(
         endpoint_name=endpoint_name,
         region_name=region,
-        model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 100, "details": True}},
+        model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 200, "details": True}},
         content_handler=content_handler
     )
 
     retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
     prompt_template = """
-      The following is a conversation between a Telstra AI chatbot and a customer. 
-      The Telstra AI chatbot is helpful and provides lots of specific details from its context.
-      If the Telstra AI chatbot does not know the answer to a question, it truthfully says it 
-      does not know.
+      You are a Telstra AI assistant that is helpful and provides specific details from its context.
       {context}
-      Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
-      if not present in the document. 
+      Instruction: Using the above documents, provide a detailed answer for "{question}" in succinct sentences. If applicable, provide a short list of brief steps. Answer "don't know" if not present in the context, don't try to make up an answer.
       Solution:"""
+
+    # prompt_template = """
+    #   The following is a conversation between a Telstra AI chatbot and a customer.
+    #   The Telstra AI chatbot is helpful and provides lots of specific details from its context.
+    #   If the Telstra AI chatbot does not know the answer to a question, it truthfully says it
+    #   does not know.
+    #   {context}
+    #   Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know"
+    #   if not present in the document.
+    #   Solution:"""
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )
