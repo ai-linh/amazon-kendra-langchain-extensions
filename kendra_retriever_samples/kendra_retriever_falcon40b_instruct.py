@@ -1,6 +1,7 @@
 import sys
 import time
 
+import langchain
 from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
@@ -9,6 +10,7 @@ from langchain.llms.sagemaker_endpoint import LLMContentHandler
 import json
 import os
 
+langchain.verbose = (os.environ["LC_VERBOSE"] == "True")
 
 def build_chain():
     region = os.environ["AWS_REGION"]
@@ -32,27 +34,34 @@ def build_chain():
     llm = SagemakerEndpoint(
         endpoint_name=endpoint_name,
         region_name=region,
-        model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 200, "details": True}},
+        model_kwargs={"parameters": {"temperature": 0.001, "max_new_tokens": 500, "repetition_penalty": 1.03, "details": True}},
         content_handler=content_handler
     )
 
     retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
-    prompt_template = """
-      You are a Telstra AI assistant that is helpful and provides specific details from its context.
-      {context}
-      Instruction: Using the above documents, provide a detailed answer for "{question}" in succinct sentences. If applicable, provide a short list of brief steps. Answer "don't know" if not present in the context, don't try to make up an answer.
-      Solution:"""
+#     prompt_template = """You are an excellent phone customer service agent for Telstra. The customer is talking to you. You searched the knowledge base for help and that is summarized below. You must only use the summary below for your answer. If the answer can not be found in the information, or the question is not relevant to the abstract, you must only answer "I'm sorry, but I don't know the answer to that". Answer the following question in no more than four sentences:
+#
+# >>QUESTION<<
+# {question}
+#
+# >>SUMMARY<<
+# {context}
+#
+# >>ANSWER<<
+# """
 
-    # prompt_template = """
-    #   The following is a conversation between a Telstra AI chatbot and a customer.
-    #   The Telstra AI chatbot is helpful and provides lots of specific details from its context.
-    #   If the Telstra AI chatbot does not know the answer to a question, it truthfully says it
-    #   does not know.
-    #   {context}
-    #   Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know"
-    #   if not present in the document.
-    #   Solution:"""
+    prompt_template = """You are an excellent phone customer service agent for Telstra. The customer is talking to you directly on the telephone. You searched the knowledge base for help and that is summarized below. You must only use the summary for your answer. If the answer can not be found in the information, or the question is not relevant to the abstract, you must only answer "I don't know the answer to that". Do not refer to "the customer" but talk to them directly as "you". Answer the customer's question succinctly in no more than four sentences:
+
+<Knowledge base>
+{context}
+
+<Customer>
+{question}
+
+<Phone Support>
+"""
+
     PROMPT = PromptTemplate(
         template=prompt_template, input_variables=["context", "question"]
     )

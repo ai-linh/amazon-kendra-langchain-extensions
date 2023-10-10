@@ -35,7 +35,6 @@ def build_chain():
       
       def transform_output(self, output: bytes) -> str:
           response_json = json.loads(output.read().decode("utf-8"))
-          #return response_json["generated_texts"][0]
           return response_json['completions'][0]['data']['text']
 
   content_handler = ContentHandler()
@@ -49,24 +48,13 @@ def build_chain():
       
   retriever = AmazonKendraRetriever(index_id=kendra_index_id)
 
-  # prompt_template = """
-  # The following is a friendly conversation between a human and an AI.
-  # The AI is talkative and provides lots of specific details from its context.
-  # If the AI does not know the answer to a question, it truthfully says it
-  # does not know.
-  # {context}
-  # Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know"
-  # if not present in the document.
-  # Solution:"""
-
   prompt_template = """
-  The following is a conversation between a call center agent and a customer. 
-  The call center agent is helpful and provides lots of specific details from its context.
-  If the call center agent does not know the answer to a question, it truthfully says it 
-  does not know.
+  The following is a conversation between an amaysim AI call center agent and a customer. The amaysim call center agent
+  is helpful and provides lots of specific details from its context. If the amaysim call center agent does not know the
+  answer to a question, it truthfully says it does not know.
   {context}
-  Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
-  if not present in the document. 
+  Instruction: Based on the above documents, provide a detailed answer for "{question}", answer "don't know" if not \
+  present in the documents. 
   Solution:"""
   PROMPT = PromptTemplate(
       template=prompt_template, input_variables=["context", "question"]
@@ -87,7 +75,8 @@ def build_chain():
         retriever=retriever, 
         condense_question_prompt=standalone_question_prompt, 
         return_source_documents=True, 
-        combine_docs_chain_kwargs={"prompt":PROMPT})
+        combine_docs_chain_kwargs={"prompt":PROMPT},
+        verbose=True)
   return qa
 
 def run_chain(chain, prompt: str, history=[]):

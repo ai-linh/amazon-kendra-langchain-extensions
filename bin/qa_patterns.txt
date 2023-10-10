@@ -1,0 +1,13 @@
+#!/bin/sed -f
+
+/^Question:/,/^$/{
+  p
+}
+
+/^Answer:/,/^----/{
+  p
+}
+
+/^Traceback/,/^----/{
+  p
+}

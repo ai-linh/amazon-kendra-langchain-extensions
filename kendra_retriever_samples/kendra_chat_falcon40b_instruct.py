@@ -42,7 +42,7 @@ def build_chain():
   llm=SagemakerEndpoint(
           endpoint_name=endpoint_name, 
           region_name=region, 
-          model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 100, "details": True}},
+          model_kwargs={"parameters": {"temperature": 0.8, "max_new_tokens": 200, "details": True}},
           content_handler=content_handler
       )
       
@@ -50,16 +50,56 @@ def build_chain():
 
   prompt_template = """
   The following is a conversation between a Telstra AI chatbot and a customer. 
-  The Telstra AI chatbot is helpful and provides lots of specific details from its context.
-  If the Telstra AI chatbot does not know the answer to a question, it truthfully says it 
+  {context}
+  Instruction: Based on the above documents, provide an answer for "{question}" in succinct, short sentences. If applicable, provide a short list of brief steps, like:
+  1: Insert the SIM
+  2: Restart the phone
+  3: Check your data plan
+  Answer "don't know"  if not present in the document. 
+  Solution:"""
+
+  prompt_template = """
+  The following is a conversation between a customer and a Telstra AI assistant. 
+  The Telstra AI assistant is helpful and provides lots of specific details from its context.
+  If the Telstra AI assistant does not know the answer to a question, it truthfully says it 
   does not know.
+  
+  Current conversation:
   {context}
   Instruction: Based on the above documents, provide a detailed answer for, {question} Answer "don't know" 
   if not present in the document. 
   Solution:"""
+
+  prompt_template = """
+  Use the following context to answer the question at the end. Answer "don't know" if not present in the context, don't try to make up an answer.
+  {context}
+  Question: {question}
+  Answer:"""
   PROMPT = PromptTemplate(
       template=prompt_template, input_variables=["context", "question"]
   )
+
+  prompt_template = """
+  You are a Telstra AI assistant that is helpful and provides specific details from its context. Use the following context to answer the question at the end. If applicable, provide a short list of brief steps. Answer "don't know" if not present in the context, don't try to make up an answer.
+  {context}
+  Question: {question}
+  Answer:"""
+
+  prompt_template = """
+  You are a Telstra AI assistant that is helpful and provides specific details from its context.
+  {context}
+  Instruction: Using the above documents, provide a detailed answer for "{question}" in succinct sentences. If applicable, provide a short list of brief steps. Answer "don't know" if not present in the context, don't try to make up an answer.
+  Solution:"""
+
+  prompt_template = """
+  The following is a conversation between a customer and a Telstra AI assistant. The Telstra AI assistant is helpful and provides specific details from its context.
+  {context}
+  Instruction: Based on the above context, provide a detailed answer for "{question}" in succinct sentences. If applicable, provide a short list of brief steps. Answer "don't know" if not present in the context, don't try to make up an answer.
+  Solution:"""
+  PROMPT = PromptTemplate(
+      template=prompt_template, input_variables=["context", "question"]
+  )
+
 
   condense_qa_template = """
   Given the following conversation and a follow up question, rephrase the follow up question 
@@ -74,7 +114,7 @@ def build_chain():
   qa = ConversationalRetrievalChain.from_llm(
         llm=llm, 
         retriever=retriever, 
-        condense_question_prompt=standalone_question_prompt, 
+        condense_question_prompt=standalone_question_prompt,
         return_source_documents=True, 
         combine_docs_chain_kwargs={"prompt":PROMPT})
   return qa
