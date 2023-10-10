@@ -28,17 +28,6 @@ PROVIDER_MAP = {
     'j2_ultra': 'Jurassic Ultra'
 }
 
-#function to read a properties file and create environment variables
-def read_properties_file(filename):
-    import os
-    import re
-    with open(filename, 'r') as f:
-        for line in f:
-            m = re.match(r'^\s*(\w+)\s*=\s*(.*)\s*$', line)
-            if m:
-                os.environ[m.group(1)] = m.group(2)
-
-
 # Check if the user ID is already stored in the session state
 if 'user_id' in st.session_state:
     user_id = st.session_state['user_id']
@@ -48,18 +37,19 @@ else:
     user_id = str(uuid.uuid4())
     st.session_state['user_id'] = user_id
 
+
 if 'llm_chain' not in st.session_state:
-    if len(sys.argv) > 1:
-        if sys.argv[1] == 'anthropic':
+    if (len(sys.argv) > 1):
+        if (sys.argv[1] == 'anthropic'):
             st.session_state['llm_app'] = anthropic
             st.session_state['llm_chain'] = anthropic.build_chain()
-        elif sys.argv[1] == 'flanxl':
+        elif (sys.argv[1] == 'flanxl'):
             st.session_state['llm_app'] = flanxl
             st.session_state['llm_chain'] = flanxl.build_chain()
-        elif sys.argv[1] == 'flanxxl':
+        elif (sys.argv[1] == 'flanxxl'):
             st.session_state['llm_app'] = flanxxl
             st.session_state['llm_chain'] = flanxxl.build_chain()
-        elif sys.argv[1] == 'openai':
+        elif (sys.argv[1] == 'openai'):
             st.session_state['llm_app'] = openai
             st.session_state['llm_chain'] = openai.build_chain()
         elif (sys.argv[1] == 'llama2'):
@@ -90,7 +80,7 @@ if 'llm_chain' not in st.session_state:
 
 if 'chat_history' not in st.session_state:
     st.session_state['chat_history'] = []
-
+    
 if "chats" not in st.session_state:
     st.session_state.chats = [
         {
@@ -108,6 +98,7 @@ if "answers" not in st.session_state:
 
 if "input" not in st.session_state:
     st.session_state.input = ""
+
 
 st.markdown("""
         <style>
@@ -127,11 +118,10 @@ st.markdown("""
         </style>
         """, unsafe_allow_html=True)
 
-
 def write_logo():
     col1, col2, col3 = st.columns([5, 1, 5])
     with col2:
-        st.image(AI_ICON, use_column_width='always')
+        st.image(AI_ICON, use_column_width='always') 
 
 
 def write_top_bar():
@@ -150,7 +140,6 @@ def write_top_bar():
         clear = st.button("Clear Chat")
     return clear
 
-
 clear = write_top_bar()
 
 if clear:
@@ -158,7 +147,6 @@ if clear:
     st.session_state.answers = []
     st.session_state.input = ""
     st.session_state["chat_history"] = []
-
 
 def handle_input():
     input = st.session_state.input
@@ -237,9 +225,9 @@ def write_chat_message(md, q):
 
 
 with st.container():
-    for (q, a) in zip(st.session_state.questions, st.session_state.answers):
-        write_user_message(q)
-        write_chat_message(a, q)
+  for (q, a) in zip(st.session_state.questions, st.session_state.answers):
+    write_user_message(q)
+    write_chat_message(a, q)
 
 st.markdown('---')
 input = st.text_input("You are talking to an AI, ask any question.", key="input", on_change=handle_input)
