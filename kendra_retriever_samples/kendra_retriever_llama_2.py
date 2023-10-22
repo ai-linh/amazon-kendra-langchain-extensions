@@ -1,11 +1,15 @@
+import sys
+
+import langchain
 from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain import SagemakerEndpoint
+from langchain.llms import SagemakerEndpoint
 from langchain.llms.sagemaker_endpoint import LLMContentHandler
 import json
 import os
 
+langchain.verbose = (os.environ.get("LC_VERBOSE") == "True")
 
 def build_chain():
     region = os.environ["AWS_REGION"]
@@ -69,8 +73,13 @@ def run_chain(chain, prompt: str, history=[]):
     }
 
 if __name__ == "__main__":
+    # read question from command line if there is one
+    if len(sys.argv) > 1:
+        question = sys.argv[1]
+    else:
+        question = "What's SageMaker?"
     chain = build_chain()
-    result = run_chain(chain, "What's SageMaker?")
+    result = run_chain(chain, question)
     print(result['answer'])
     if 'source_documents' in result:
         print('Sources:')
