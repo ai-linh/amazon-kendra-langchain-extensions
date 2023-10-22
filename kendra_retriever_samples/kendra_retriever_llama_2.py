@@ -1,4 +1,5 @@
 import sys
+import time
 
 import langchain
 from langchain.retrievers import AmazonKendraRetriever
