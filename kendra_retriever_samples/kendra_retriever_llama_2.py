@@ -72,7 +72,8 @@ def run_chain(chain, prompt: str, history=[]):
     # To make it compatible with chat samples
     return {
         "answer": result['result'],
-        "source_documents": result['source_documents']
+        "source_documents": result['source_documents'],
+        "metrics": f"{start},{end},{end-start}"
     }
 
 if __name__ == "__main__":
