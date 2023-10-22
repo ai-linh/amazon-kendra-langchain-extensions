@@ -65,7 +65,9 @@ def build_chain():
     return qa
 
 def run_chain(chain, prompt: str, history=[]):
+    start = time.time()
     result = chain(prompt)
+    end = time.time()
     # To make it compatible with chat samples
     return {
         "answer": result['result'],
@@ -79,9 +81,11 @@ if __name__ == "__main__":
     else:
         question = "What's SageMaker?"
     chain = build_chain()
+    print(f"Question: {question}")
     result = run_chain(chain, question)
-    print(result['answer'])
+    print(f"Answer: {result['answer']}")
     if 'source_documents' in result:
         print('Sources:')
         for d in result['source_documents']:
-          print(d.metadata['source'])
+            print(d.metadata['source'])
+    print(f"metrics: {result['metrics']}")
