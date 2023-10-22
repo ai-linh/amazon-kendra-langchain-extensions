@@ -1,7 +1,7 @@
 from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import ConversationalRetrievalChain
 from langchain.prompts import PromptTemplate
-from langchain import OpenAI
+from langchain.llms import OpenAI
 import sys
 import os
 
