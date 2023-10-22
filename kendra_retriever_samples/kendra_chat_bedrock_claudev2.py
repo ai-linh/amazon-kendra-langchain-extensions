@@ -3,7 +3,6 @@ from langchain.retrievers import AmazonKendraRetriever
 from langchain.chains import ConversationalRetrievalChain
 from langchain.prompts import PromptTemplate
 from langchain.llms.bedrock import Bedrock
-from langchain.chains.llm import LLMChain
 import sys
 import os
 
@@ -54,6 +53,26 @@ def build_chain():
 
   Assistant:
   """
+
+  prompt_template = """Human: You are an excellent phone customer service agent for Telstra.
+  The customer is talking to you directly on the telephone. You searched the knowledge base
+  for help and that is summarized below in <documents> tags. You must only use the summary
+  for your answer. If the answer can not be found in the documents, or the question is not
+  relevant to the abstract, you must only answer "I don't know the answer to that". Do not
+  refer to "the customer" but talk to them directly as "you". Answer the customer's question
+  succinctly in no more than four sentences.
+
+  <documents>
+  {context}
+  </documents>
+  
+  <customer>
+  {question}
+  </customer>
+
+  Assistant:
+  """
+
   PROMPT = PromptTemplate(
       template=prompt_template, input_variables=["context", "question"]
   )
